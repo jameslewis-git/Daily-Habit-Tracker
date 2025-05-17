@@ -1,4 +1,5 @@
 # 🌌 Quantum Habits
+## Daily habit checklist with progress bar.
 
 A terminal-themed habit tracking application that brings a cyberpunk aesthetic to your daily routine management. Built with Next.js, TypeScript, and Framer Motion.
 
