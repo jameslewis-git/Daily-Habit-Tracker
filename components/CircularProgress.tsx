@@ -18,11 +18,11 @@ const AnimatedPercentage: React.FC<{ percentage: number }> = ({ percentage }) =>
 
 export const CircularProgress: React.FC<CircularProgressProps> = ({ percentage }) => {
   const radius = 75;
+  const circumference = 2 * Math.PI * radius;
   const strokeWidth = 12;
   const viewBoxSize = 2 * (radius + strokeWidth + 5);
   const center = viewBoxSize / 2;
 
-  const circumference = 2 * Math.PI * radius;
   const progressSpring = useSpring(circumference, { stiffness: 50, damping: 30, mass: 1.2 });
   React.useEffect(() => {
     progressSpring.set(circumference - (percentage / 100) * circumference);
@@ -44,7 +44,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({ percentage }
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, ease: "backOut" }}
     >
-      <div className="relative h-[200px] w-[200px] sm:h-[220px] sm:w-[220px]"> 
+      <div className="relative h-[200px] w-[200px] sm:h-[220px] sm:w-[220px]">
         <svg
           className="absolute inset-0 -rotate-90 transform"
           width="100%"

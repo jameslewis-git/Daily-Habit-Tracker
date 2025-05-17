@@ -2,15 +2,16 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GripVertical, Flame, Zap, CheckCircle, Target } from 'lucide-react';
+import { GripVertical, Flame, Zap, CheckCircle, Target, Trash2 } from 'lucide-react';
 import { Habit } from '@/types';
 
 interface HabitItemProps {
   habit: Habit;
   onToggle: () => void;
+  onDelete: () => void;
 }
 
-export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
+export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle, onDelete }) => {
   const {
     attributes,
     listeners,
@@ -63,21 +64,21 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
       {...attributes}
     >
       <motion.button
-        className="flex-none cursor-grab active:cursor-grabbing text-terminal-green opacity-60 hover:opacity-100 p-2 rounded-md focus-visible:ring-2 focus-visible:ring-terminal-green"
+        className="flex-none cursor-grab active:cursor-grabbing text-terminal-green opacity-60 hover:opacity-100 p-1 rounded-md focus-visible:ring-1 focus-visible:ring-terminal-green"
         {...listeners}
         title="Drag to reorder protocol"
         whileTap={{ scale: 1.2, color: 'var(--terminal-green)' }}
       >
-        <GripVertical size={28} strokeWidth={1.5} />
+        <GripVertical size={14} strokeWidth={1.5} />
       </motion.button>
 
       <motion.button
         onClick={onToggle}
         className={`
-          relative flex-none h-10 w-10 sm:h-12 sm:w-12 rounded-lg 
+          relative flex-none h-6 w-6 sm:h-8 sm:w-8 rounded-lg 
           flex items-center justify-center 
-          border-2 transition-all duration-200 ease-in-out 
-          focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-terminal-background focus-visible:ring-terminal-green
+          border border-terminal-green transition-all duration-200 ease-in-out 
+          focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:ring-offset-terminal-background focus-visible:ring-terminal-green
           group terminal-button
           ${habit.completed
             ? 'shadow-glow-primary'
@@ -85,7 +86,7 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
           }
         `}
         whileHover={{ 
-          scale: 1.18,
+          scale: 1.1,
           transition: { type: 'spring', stiffness: 300, damping: 15 }
         }}
         whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
@@ -110,7 +111,7 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
               }}
               className="text-terminal-green"
             >
-              <CheckCircle size={28} strokeWidth={2.5}/>
+              <CheckCircle size={14} strokeWidth={2}/>
             </motion.div>
           ) : (
             <motion.div
@@ -128,20 +129,20 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
               }}
               className="text-terminal-green opacity-60 group-hover:opacity-100 transition-opacity duration-200"
             >
-              <Target size={26} strokeWidth={2} />
+              <Target size={13} strokeWidth={2} />
             </motion.div>
           )}
         </AnimatePresence>
       </motion.button>
 
-      <div className="flex-grow min-w-0 mr-3">
-        <h3 className={`terminal-text text-lg sm:text-xl font-semibold transition-colors duration-300 truncate 
+      <div className="flex-grow min-w-0 mr-2">
+        <h3 className={`terminal-text text-sm sm:text-base font-semibold transition-colors duration-300 truncate 
           ${habit.completed ? 'line-through opacity-70' : 'hover:text-terminal-green'}
         `}>
           {habit.name}
         </h3>
         {habit.description && (
-          <p className={`text-sm sm:text-base opacity-90 truncate transition-all duration-200
+          <p className={`text-xs sm:text-sm opacity-90 truncate transition-all duration-200
             ${habit.completed ? 'line-through opacity-70' : 'hover:opacity-100 hover:text-terminal-green'}
             group-hover:opacity-100`}>
             {habit.description}
@@ -149,21 +150,33 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
         )}
       </div>
 
-      {habit.streak > 0 && (
-        <motion.div 
-          className={`terminal-status flex items-center gap-2.5 text-base sm:text-lg font-medium p-2.5 sm:p-3.5 min-w-[70px] justify-center rounded-lg
-            ${habit.completed ? 'shadow-glow-primary' : ''}
-            ${habit.streak > 5 ? 'bg-terminal-green bg-opacity-10' : ''}
-          `}
-          initial={{ opacity: 0, y: 10}}
-          animate={{ opacity: 1, y: 0}}
-          transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 15}}
-          title={`Current cycle: ${habit.streak} ${habit.streak === 1 ? 'day' : 'days'}`}
+      <div className="flex items-center gap-1">
+        {habit.streak > 0 && (
+          <motion.div 
+            className={`terminal-status flex items-center gap-1.5 text-sm sm:text-base font-medium p-1.5 sm:p-2 min-w-[50px] justify-center rounded-lg
+              ${habit.completed ? 'shadow-glow-primary' : ''}
+              ${habit.streak > 5 ? 'bg-terminal-green bg-opacity-10' : ''}
+            `}
+            initial={{ opacity: 0, y: 10}}
+            animate={{ opacity: 1, y: 0}}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 15}}
+            title={`Current cycle: ${habit.streak} ${habit.streak === 1 ? 'day' : 'days'}`}
+          >
+            <Flame size={12} strokeWidth={1.5} className={`${habit.streak > 5 ? 'text-terminal-green animate-pulse-strong' : 'opacity-80' }`} />
+            <span className="font-mono tracking-tight font-semibold">{habit.streak}</span>
+          </motion.div>
+        )}
+        
+        <motion.button
+          onClick={onDelete}
+          className="terminal-button p-1 opacity-60 hover:opacity-100 transition-opacity duration-200"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          title="Delete Protocol"
         >
-          <Flame size={24} strokeWidth={1.5} className={`${habit.streak > 5 ? 'text-terminal-green animate-pulse-strong' : 'opacity-80' }`} />
-          <span className="font-mono tracking-tight font-semibold">{habit.streak}</span>
-        </motion.div>
-      )}
+          <Trash2 size={12} className="text-red-500" />
+        </motion.button>
+      </div>
     </motion.div>
   );
 }; 

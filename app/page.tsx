@@ -8,6 +8,7 @@ import Confetti from 'react-confetti';
 import { HabitList } from '@/components/HabitList';
 import { CircularProgress } from '@/components/CircularProgress';
 import { AddHabitModal } from '@/components/AddHabitModal';
+import { OperatorLogin } from '@/components/OperatorLogin';
 import { useHabits } from '@/hooks/useHabits';
 import { Habit } from '@/types';
 
@@ -20,7 +21,7 @@ const pageTransitionVariants = {
       duration: 2,
       ease: [0.25, 0.1, 0.25, 1],
       staggerChildren: 0.5,
-    } 
+  }
   },
   exit: { 
     opacity: 0, 
@@ -148,6 +149,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
+  const [operatorName, setOperatorName] = useState<string | null>(null);
   const { theme, setTheme } = useTheme();
   const {
     habits,
@@ -155,6 +157,7 @@ export default function Home() {
     toggleHabit,
     updateHabits,
     getCompletionPercentage,
+    deleteHabit,
   } = useHabits();
 
   const [history, setHistory] = useState<Habit[][]>([]);
@@ -164,7 +167,11 @@ export default function Home() {
   useEffect(() => {
     // Increase loading time for more dramatic effect
     const mountTimer = setTimeout(() => setMounted(true), 1000);
-    const loadTimer = setTimeout(() => setIsFullyLoaded(true), 6000);
+    const loadTimer = setTimeout(() => {
+      setIsFullyLoaded(true);
+      // Always show login screen on refresh
+      setOperatorName(null);
+    }, 6000);
     
     return () => {
       clearTimeout(mountTimer);
@@ -209,6 +216,10 @@ export default function Home() {
     return <LoadingSequence />;
   }
 
+  if (!operatorName) {
+    return <OperatorLogin onComplete={setOperatorName} />;
+  }
+
   return (
     <motion.div 
       className="terminal-container"
@@ -229,50 +240,18 @@ export default function Home() {
         />
       }
       
-      <header className="w-full max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <div className="terminal-controls">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleUndo}
-            disabled={historyIndex <= 0} 
-            className="terminal-control-btn text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-            title="Undo Action Matrix Reversion"
-          >
-            <RotateCcw size={14} />
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleRedo}
-            disabled={historyIndex >= history.length - 1 || history.length <= 1}
-            className="terminal-control-btn text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-            title="Redo Action Matrix Forwarding"
-          >
-            <RotateCw size={14} />
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="terminal-control-btn text-sm"
-            title="Toggle Dimensional Theme Shift"
-          >
-            {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-          </motion.button>
-        </div>
-            
+      <header className="w-full max-w-3xl mx-auto px-2 sm:px-3 py-2 sm:py-3">
         <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={0.1}>
-          <h1 className="terminal-title text-xl sm:text-2xl md:text-3xl mb-1.5">
-            {'>'}QUANTUM HABITS_
+          <h1 className="terminal-title text-base sm:text-lg md:text-xl mb-1">
+            {'>'}QUANTUM HABITS_ <span className="text-sm opacity-70">| OPERATOR: {operatorName}</span>
           </h1>
-          <p className="terminal-subtitle text-xs sm:text-sm">
+          <p className="terminal-subtitle text-2xs sm:text-xs">
             $ initialize reality_matrix --mode=optimization
           </p>
         </motion.div>
       </header>
 
-      <main className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-4 flex flex-col gap-6 sm:gap-8">
+      <main className="w-full max-w-xl mx-auto px-2 sm:px-3 py-2 flex flex-col gap-3 sm:gap-4">
         <motion.section 
           aria-label="Overall Progress Nexus"
           variants={sectionVariants} 
@@ -282,14 +261,14 @@ export default function Home() {
           className="flex justify-center"
         >
           <CircularProgress percentage={completionPercentage} />
-          <div className="text-center mt-2">
-            <p className="terminal-text text-xs sm:text-sm">
+          <div className="text-center mt-1">
+            <p className="terminal-text text-2xs sm:text-xs">
               {completionPercentage === 0 
                 ? "SYSTEM STANDBY. AWAITING DIRECTIVE... ⚡️"
                 : `SYSTEM OPTIMIZATION: ${completionPercentage}%`
               }
             </p>
-          </div>
+                </div>
         </motion.section>
 
         <motion.section 
@@ -300,8 +279,8 @@ export default function Home() {
           custom={0.4}
           className="terminal-window relative"
         >
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="terminal-section-title text-base sm:text-lg">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="terminal-section-title text-sm sm:text-base">
               {'>'}ACTIVE_PROTOCOLS
             </h2>
           </div>
@@ -310,6 +289,7 @@ export default function Home() {
             habits={habits}
             onHabitsChange={updateHabits}
             onToggleHabit={toggleHabit}
+            onDeleteHabit={deleteHabit}
           />
           
           <motion.button
@@ -328,7 +308,7 @@ export default function Home() {
             }}
             aria-label="Initiate New Habit Protocol"
           >
-            <Plus size={16} />
+            <Plus size={12} />
           </motion.button>
         </motion.section>
       </main>

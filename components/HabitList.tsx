@@ -9,9 +9,10 @@ interface HabitListProps {
   habits: Habit[];
   onHabitsChange: (habits: Habit[]) => void;
   onToggleHabit: (id: string) => void;
+  onDeleteHabit: (id: string) => void;
 }
 
-export const HabitList: React.FC<HabitListProps> = ({ habits, onHabitsChange, onToggleHabit }) => {
+export const HabitList: React.FC<HabitListProps> = ({ habits, onHabitsChange, onToggleHabit, onDeleteHabit }) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -49,6 +50,7 @@ export const HabitList: React.FC<HabitListProps> = ({ habits, onHabitsChange, on
                 key={habit.id}
                 habit={habit}
                 onToggle={() => onToggleHabit(habit.id)}
+                onDelete={() => onDeleteHabit(habit.id)}
               />
             ))}
           </AnimatePresence>

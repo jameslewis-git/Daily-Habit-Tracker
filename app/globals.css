@@ -909,3 +909,73 @@ button, a {
     inset 0 0 20px rgba(0, 255, 0, 0.15),
     0 0 15px rgba(0, 255, 0, 0.15);
 }
+
+/* Hexagonal button styles */
+.hexagonal-btn {
+  position: relative;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  background: rgba(0, 20, 0, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.hexagonal-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, 
+    rgba(0, 255, 0, 0.1),
+    rgba(0, 255, 0, 0.05) 30%,
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hexagonal-btn:hover::before {
+  opacity: 1;
+}
+
+.hexagonal-btn::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(45deg, 
+    rgba(0, 255, 0, 0.2),
+    transparent 60%
+  );
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hexagonal-btn:hover::after {
+  opacity: 1;
+}
+
+.hexagonal-btn:disabled::before,
+.hexagonal-btn:disabled::after {
+  opacity: 0;
+}
+
+/* Add a subtle pulse animation for the icons */
+.hexagonal-btn svg {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 2px rgba(0, 255, 0, 0.5));
+}
+
+.hexagonal-btn:hover svg {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(0, 255, 0, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 4px rgba(0, 255, 0, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(0, 255, 0, 0.5));
+  }
+}
