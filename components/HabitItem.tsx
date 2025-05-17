@@ -35,9 +35,9 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
     },
     exit: { opacity: 0, y: -20, scale: 0.95, filter: 'blur(3px)', transition: { duration: 0.25 } },
     hover: { 
-      scale: 1.02, 
-      boxShadow: "0px 8px 25px -8px hsl(var(--primary) / 0.3), 0px 4px 10px -5px hsl(var(--primary) / 0.2)",
-      borderColor: "hsl(var(--primary) / 0.8)"
+      scale: 1.02,
+      boxShadow: "0 0 20px rgba(0, 255, 0, 0.2)",
+      borderColor: "var(--terminal-green)"
     }
   };
   
@@ -50,11 +50,9 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
       ref={setNodeRef}
       style={style}
       className={`
-        relative flex items-center gap-3 sm:gap-4 rounded-xl p-3.5 sm:p-4 
-        glassmorphism-interactive
-        border-2 border-transparent
-        ${isDragging ? 'scale-105 !shadow-2xl !shadow-primary/40 cursor-grabbing' : 'cursor-default'}
-        ${habit.completed ? 'bg-card/40 dark:bg-card/50' : 'bg-card/70 dark:bg-card/80'}
+        terminal-card relative flex items-center gap-4 sm:gap-6 rounded-xl p-5 sm:p-6 
+        ${isDragging ? 'scale-105 shadow-glow-primary cursor-grabbing' : 'cursor-default'}
+        ${habit.completed ? 'bg-opacity-40' : 'bg-opacity-70'}
       `}
       variants={cardVariants}
       initial="initial"
@@ -65,31 +63,30 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
       {...attributes}
     >
       <motion.button
-        className="flex-none cursor-grab active:cursor-grabbing text-muted-foreground/60 hover:text-primary p-1.5 rounded-md focus-visible:ring-2 focus-visible:ring-primary"
+        className="flex-none cursor-grab active:cursor-grabbing text-terminal-green opacity-60 hover:opacity-100 p-2 rounded-md focus-visible:ring-2 focus-visible:ring-terminal-green"
         {...listeners}
         title="Drag to reorder protocol"
-        whileTap={{ scale: 1.2, color: 'hsl(var(--primary))' }}
+        whileTap={{ scale: 1.2, color: 'var(--terminal-green)' }}
       >
-        <GripVertical size={22} strokeWidth={1.5} />
+        <GripVertical size={28} strokeWidth={1.5} />
       </motion.button>
 
       <motion.button
         onClick={onToggle}
         className={`
-          relative flex-none h-8 w-8 sm:h-9 sm:w-9 rounded-lg 
+          relative flex-none h-10 w-10 sm:h-12 sm:w-12 rounded-lg 
           flex items-center justify-center 
           border-2 transition-all duration-200 ease-in-out 
-          focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-primary
-          group
+          focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-terminal-background focus-visible:ring-terminal-green
+          group terminal-button
           ${habit.completed
-            ? 'bg-primary/20 border-primary/70 shadow-glow-primary dark:shadow-glow-primary'
-            : 'bg-transparent border-muted-foreground/30 hover:border-primary/70'
+            ? 'shadow-glow-primary'
+            : 'hover:shadow-glow-primary'
           }
         `}
         whileHover={{ 
-          scale: 1.18, 
-          borderColor: habit.completed ? 'hsl(var(--primary))' : 'hsl(var(--primary))',
-          transition: { type: 'spring', stiffness: 300, damping: 15 } 
+          scale: 1.18,
+          transition: { type: 'spring', stiffness: 300, damping: 15 }
         }}
         whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
         title={habit.completed ? "Deactivate Protocol" : "Activate Protocol"}
@@ -111,9 +108,9 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
                 rotate: 90, 
                 transition: { type: "spring", stiffness: 300, damping: 20, duration: 0.2 } 
               }}
-              className="text-primary"
+              className="text-terminal-green"
             >
-              <CheckCircle size={22} strokeWidth={2.5}/>
+              <CheckCircle size={28} strokeWidth={2.5}/>
             </motion.div>
           ) : (
             <motion.div
@@ -129,22 +126,24 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
                 opacity: 0, 
                 transition: { type: "spring", stiffness: 300, damping: 20, duration: 0.15 } 
               }}
-              className="text-muted-foreground/60 group-hover:text-primary transition-colors duration-200"
+              className="text-terminal-green opacity-60 group-hover:opacity-100 transition-opacity duration-200"
             >
-              <Target size={20} strokeWidth={2} />
+              <Target size={26} strokeWidth={2} />
             </motion.div>
           )}
         </AnimatePresence>
       </motion.button>
 
-      <div className="flex-grow min-w-0 mr-2">
-        <h3 className={`text-base sm:text-lg font-semibold transition-colors duration-300 truncate 
-          ${habit.completed ? 'line-through text-muted-foreground/70' : 'text-foreground hover:text-primary'}
+      <div className="flex-grow min-w-0 mr-3">
+        <h3 className={`terminal-text text-lg sm:text-xl font-semibold transition-colors duration-300 truncate 
+          ${habit.completed ? 'line-through opacity-70' : 'hover:text-terminal-green'}
         `}>
           {habit.name}
         </h3>
         {habit.description && (
-          <p className={`text-xs sm:text-sm text-muted-foreground/80 truncate ${habit.completed ? 'line-through' : ''}`}>
+          <p className={`text-sm sm:text-base opacity-90 truncate transition-all duration-200
+            ${habit.completed ? 'line-through opacity-70' : 'hover:opacity-100 hover:text-terminal-green'}
+            group-hover:opacity-100`}>
             {habit.description}
           </p>
         )}
@@ -152,17 +151,17 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
 
       {habit.streak > 0 && (
         <motion.div 
-          className={`flex items-center gap-1.5 text-xs sm:text-sm font-medium p-1.5 sm:p-2 rounded-lg min-w-[50px] justify-center ${streakGlowClass}
-            bg-card/50 dark:bg-card/30 border border-border/30
-            ${habit.completed ? 'text-primary/90' : 'text-accent dark:text-accent'}
+          className={`terminal-status flex items-center gap-2.5 text-base sm:text-lg font-medium p-2.5 sm:p-3.5 min-w-[70px] justify-center rounded-lg
+            ${habit.completed ? 'shadow-glow-primary' : ''}
+            ${habit.streak > 5 ? 'bg-terminal-green bg-opacity-10' : ''}
           `}
           initial={{ opacity: 0, y: 10}}
           animate={{ opacity: 1, y: 0}}
           transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 15}}
           title={`Current cycle: ${habit.streak} ${habit.streak === 1 ? 'day' : 'days'}`}
         >
-          <Flame size={16} strokeWidth={1.5} className={`${habit.streak > 5 ? 'text-red-500 animate-pulse-strong' : 'opacity-80' }`} />
-          <span className="font-mono tracking-tight">{habit.streak}</span>
+          <Flame size={24} strokeWidth={1.5} className={`${habit.streak > 5 ? 'text-terminal-green animate-pulse-strong' : 'opacity-80' }`} />
+          <span className="font-mono tracking-tight font-semibold">{habit.streak}</span>
         </motion.div>
       )}
     </motion.div>

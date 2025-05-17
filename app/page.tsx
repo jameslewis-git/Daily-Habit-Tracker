@@ -76,9 +76,7 @@ const LoadingSequence = () => {
         clearInterval(typingInterval);
         // Move to next step after a delay
         setTimeout(() => {
-          if (loadingStep < loadingSteps.length - 1) {
-            setLoadingStep(prev => prev + 1);
-          }
+          setLoadingStep(prev => prev + 1);
         }, 500);
       }
     }, 50); // Typing speed
@@ -86,10 +84,18 @@ const LoadingSequence = () => {
     return () => clearInterval(typingInterval);
   }, [loadingStep]);
 
+  // Calculate percentage based on both the current step and typing progress
+  const calculateProgress = () => {
+    if (loadingStep >= loadingSteps.length) return 100;
+    const stepProgress = (loadingStep / (loadingSteps.length - 1)) * 100;
+    const typingProgress = (loadingText.length / loadingSteps[loadingStep].length) * (100 / loadingSteps.length);
+    return Math.min(100, Math.round(stepProgress + typingProgress));
+  };
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="terminal-screen w-full max-w-2xl aspect-video p-8 rounded-sm">
-        <motion.div
+        <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
@@ -97,8 +103,8 @@ const LoadingSequence = () => {
         >
           <>
             <div className="flex flex-col items-center gap-2 w-full">
-              <motion.div 
-                className="text-center"
+          <motion.div 
+            className="text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
@@ -107,7 +113,7 @@ const LoadingSequence = () => {
                   {loadingText}<span className="terminal-cursor" />
                 </p>
                 <p className="terminal-text-static text-sm opacity-60">
-                  {Math.round((loadingStep / (loadingSteps.length - 1)) * 100)}% COMPLETE
+                  {calculateProgress()}% COMPLETE
                 </p>
               </motion.div>
               
@@ -115,7 +121,7 @@ const LoadingSequence = () => {
                 <motion.div
                   className="loading-bar"
                   initial={{ width: "0%" }}
-                  animate={{ width: `${(loadingStep / (loadingSteps.length - 1)) * 100}%` }}
+                  animate={{ width: `${calculateProgress()}%` }}
                   transition={{ duration: 0.5 }}
                 />
               </div>
@@ -214,59 +220,59 @@ export default function Home() {
       {showConfetti && 
         <Confetti 
           recycle={false} 
-          numberOfPieces={400} 
+          numberOfPieces={300}
           gravity={0.1} 
-          initialVelocityX={{min: -10, max: 10}}
-          initialVelocityY={{min: -15, max: 5}}
+          initialVelocityX={{min: -8, max: 8}}
+          initialVelocityY={{min: -12, max: 4}}
           colors={['#00FF00', '#33FF33', '#66FF66']}
           className="!fixed z-[100]"
         />
       }
       
-      <header className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <header className="w-full max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <div className="terminal-controls">
           <motion.button
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleUndo}
             disabled={historyIndex <= 0} 
-            className="terminal-control-btn disabled:opacity-40 disabled:cursor-not-allowed"
+            className="terminal-control-btn text-sm disabled:opacity-40 disabled:cursor-not-allowed"
             title="Undo Action Matrix Reversion"
           >
-            <RotateCcw size={16} />
+            <RotateCcw size={14} />
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleRedo}
             disabled={historyIndex >= history.length - 1 || history.length <= 1}
-            className="terminal-control-btn disabled:opacity-40 disabled:cursor-not-allowed"
+            className="terminal-control-btn text-sm disabled:opacity-40 disabled:cursor-not-allowed"
             title="Redo Action Matrix Forwarding"
           >
-            <RotateCw size={16} />
+            <RotateCw size={14} />
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="terminal-control-btn"
+            className="terminal-control-btn text-sm"
             title="Toggle Dimensional Theme Shift"
           >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
           </motion.button>
         </div>
-
+            
         <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={0.1}>
-          <h1 className="terminal-title">
+          <h1 className="terminal-title text-xl sm:text-2xl md:text-3xl mb-1.5">
             {'>'}QUANTUM HABITS_
           </h1>
-          <p className="terminal-subtitle">
+          <p className="terminal-subtitle text-xs sm:text-sm">
             $ initialize reality_matrix --mode=optimization
           </p>
         </motion.div>
       </header>
 
-      <main className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-10 sm:gap-12">
+      <main className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-4 flex flex-col gap-6 sm:gap-8">
         <motion.section 
           aria-label="Overall Progress Nexus"
           variants={sectionVariants} 
@@ -276,8 +282,8 @@ export default function Home() {
           className="flex justify-center"
         >
           <CircularProgress percentage={completionPercentage} />
-          <div className="text-center mt-4">
-            <p className="terminal-text text-lg">
+          <div className="text-center mt-2">
+            <p className="terminal-text text-xs sm:text-sm">
               {completionPercentage === 0 
                 ? "SYSTEM STANDBY. AWAITING DIRECTIVE... ⚡️"
                 : `SYSTEM OPTIMIZATION: ${completionPercentage}%`
@@ -294,12 +300,12 @@ export default function Home() {
           custom={0.4}
           className="terminal-window relative"
         >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="terminal-section-title">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="terminal-section-title text-base sm:text-lg">
               {'>'}ACTIVE_PROTOCOLS
             </h2>
           </div>
-          
+
           <HabitList
             habits={habits}
             onHabitsChange={updateHabits}
@@ -310,7 +316,7 @@ export default function Home() {
             onClick={() => setIsModalOpen(true)}
             className="add-habit-btn"
             whileHover={{ 
-              scale: 1.1,
+              scale: 1.05,
               boxShadow: 'var(--terminal-glow)'
             }}
             whileTap={{ scale: 0.95 }}
@@ -322,7 +328,7 @@ export default function Home() {
             }}
             aria-label="Initiate New Habit Protocol"
           >
-            <Plus size={24} />
+            <Plus size={16} />
           </motion.button>
         </motion.section>
       </main>

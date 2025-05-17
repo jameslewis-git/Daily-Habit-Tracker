@@ -1,50 +1,91 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, PlusSquare, AlertTriangle } from 'lucide-react';
+import { X, Plus, Terminal, Hash, Zap } from 'lucide-react';
+import { Habit } from '@/types';
 
 interface AddHabitModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (name: string, description?: string) => void;
+  onAdd: (habit: Omit<Habit, 'id' | 'streak' | 'completed'>) => void;
 }
 
-export const AddHabitModal: React.FC<AddHabitModalProps> = ({
-  isOpen,
-  onClose,
-  onAdd,
-}) => {
+const COMMON_HABITS = [
+  {
+    name: "Morning Meditation",
+    description: "Start the day with 10 minutes of mindfulness",
+    category: "MINDFULNESS"
+  },
+  {
+    name: "Daily Exercise",
+    description: "30 minutes of physical activity",
+    category: "FITNESS"
+  },
+  {
+    name: "Read Books",
+    description: "Read for 20 minutes",
+    category: "LEARNING"
+  },
+  {
+    name: "Drink Water",
+    description: "8 glasses of water daily",
+    category: "HEALTH"
+  },
+  {
+    name: "Code Practice",
+    description: "1 hour of coding practice",
+    category: "LEARNING"
+  },
+  {
+    name: "Journal Writing",
+    description: "Document daily thoughts and experiences",
+    category: "MINDFULNESS"
+  },
+  {
+    name: "Early Rise",
+    description: "Wake up at 6:00 AM",
+    category: "PRODUCTIVITY"
+  },
+  {
+    name: "Healthy Meal",
+    description: "Prepare a nutritious meal",
+    category: "HEALTH"
+  }
+] as const;
+
+export const AddHabitModal: React.FC<AddHabitModalProps> = ({ isOpen, onClose, onAdd }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [nameError, setNameError] = useState('');
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      setNameError('Protocol Name is mandatory for system integration.');
-      nameInputRef.current?.focus();
-      return;
-    }
-    setNameError('');
-    onAdd(name.trim(), description.trim() || undefined);
-    // Resetting state is handled by useEffect [isOpen]
+    if (!name.trim()) return;
+
+    setLoading(true);
+    // Simulate loading for terminal effect
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    onAdd({
+      name: name.trim(),
+      description: description.trim() || undefined,
+      createdAt: new Date().toISOString(),
+      position: Date.now(),
+      category: 'CUSTOM',
+      frequency: 'DAILY',
+      reminder: 'NONE'
+    });
+
+    setName('');
+    setDescription('');
+    setLoading(false);
     onClose();
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      setName('');
-      setDescription('');
-      setNameError('');
-      // Delay focus to allow modal animation to complete
-      setTimeout(() => nameInputRef.current?.focus(), 150);
-    } 
-  }, [isOpen]);
-
-  const modalVariants = {
-    hidden: { opacity: 0, scale: 0.9, y: 50, filter: 'blur(8px)' },
-    visible: { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 250, damping: 30, delay: 0.05 } },
-    exit: { opacity: 0, scale: 0.9, y: 30, filter: 'blur(5px)', transition: { duration: 0.25, ease: 'easeIn' } },
+  const selectCommonHabit = (habit: typeof COMMON_HABITS[number]) => {
+    setName(habit.name);
+    setDescription(habit.description);
+    setShowSuggestions(false);
   };
 
   return (
@@ -53,114 +94,142 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.3 } }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={onClose}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
         >
           <motion.div
-            variants={modalVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onClick={(e) => e.stopPropagation()}
-            className="glassmorphism-interactive w-full max-w-lg rounded-xl p-6 sm:p-8 shadow-2xl border-border/70 dark:border-primary/30"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="add-habit-modal-title"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            onClick={e => e.stopPropagation()}
+            className="terminal-window w-full max-w-xl relative"
           >
-            <div className="relative">
-              <motion.button
-                onClick={onClose}
-                className="absolute -right-3 -top-3 text-muted-foreground hover:text-primary p-1.5 rounded-full hover:bg-card/70 focus-visible:ring-2 focus-visible:ring-primary"
-                whileHover={{ scale: 1.25, rotate: 135, transition: {type: 'spring', stiffness:300} }}
-                whileTap={{ scale: 0.9 }}
-                title="Terminate Process"
-                aria-label="Close add habit modal"
-              >
-                <X size={26} strokeWidth={2.5} />
-              </motion.button>
-
-              <h2 id="add-habit-modal-title" className="mb-2 text-2xl sm:text-3xl font-semibold text-gradient-primary-secondary text-focus-in">
-                Initiate New Protocol
-              </h2>
-              <p className="mb-6 sm:mb-8 text-sm text-muted-foreground">
-                Define parameters for a new habit integration sequence.
-              </p>
-
-              <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-                <div>
-                  <label
-                    htmlFor="habit-name-input"
-                    className="mb-1.5 block text-sm font-medium text-foreground/80 tracking-wide"
-                  >
-                    Protocol Name <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    ref={nameInputRef}
-                    type="text"
-                    id="habit-name-input"
-                    value={name}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                      if (e.target.value.trim()) setNameError('');
-                    }}
-                    className={`w-full rounded-md border-2 bg-background/60 px-4 py-3 text-foreground placeholder:text-muted-foreground/60 
-                               focus:outline-none focus:ring-2 focus:ring-primary/80 transition-all duration-200 shadow-sm 
-                               hover:border-primary/70 focus:border-primary ${nameError ? 'border-red-500/70 focus:ring-red-500/50' : 'border-border'}`}
-                    placeholder="e.g., 'Daily_Recon_Scan'"
-                  />
-                  {nameError && (
-                    <motion.p 
-                      initial={{opacity:0, y: -10}}
-                      animate={{opacity:1, y:0}}
-                      className="mt-2 flex items-center text-xs text-red-400">
-                      <AlertTriangle size={14} className="mr-1.5"/> {nameError}
-                    </motion.p>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="habit-description-input"
-                    className="mb-1.5 block text-sm font-medium text-foreground/80 tracking-wide"
-                  >
-                    Operational Briefing (Optional)
-                  </label>
-                  <textarea
-                    id="habit-description-input"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full rounded-md border-2 border-border bg-background/60 px-4 py-3 text-foreground placeholder:text-muted-foreground/60 
-                               focus:outline-none focus:ring-2 focus:ring-primary/80 transition-all duration-200 shadow-sm 
-                               hover:border-primary/70 focus:border-primary min-h-[90px] resize-y"
-                    placeholder="e.g., 'Execute 15-minute data assimilation cycle from Sector 7 archives.'"
-                    rows={3}
-                  />
-                </div>
-
-                <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 sm:pt-5">
-                  <motion.button
-                    type="button"
-                    onClick={onClose}
-                    className="btn-futuristic btn-futuristic-secondary w-full sm:w-auto !bg-muted hover:!bg-muted/80 !text-muted-foreground hover:!border-border"
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    Abort Sequence
-                  </motion.button>
-                  <motion.button
-                    type="submit"
-                    className={`btn-futuristic w-full sm:w-auto ${!name.trim() ? 'opacity-60 cursor-not-allowed !shadow-none' : ''}`}
-                    disabled={!name.trim()} 
-                    whileHover={name.trim() ? { scale: 1.03, y: -3, transition: {type: 'spring', stiffness:300} } : {}}
-                    whileTap={name.trim() ? { scale: 0.97, y: 0 } : {}}
-                  >
-                    <PlusSquare size={20} className="inline mr-2 -mt-0.5" />
-                    Integrate Protocol
-                  </motion.button>
-                </div>
-              </form>
+            {/* Terminal Header */}
+            <div className="terminal-header mb-4">
+              <div className="terminal-controls">
+                <div className="terminal-control bg-red-500 w-3 h-3" onClick={onClose}></div>
+                <div className="terminal-control bg-yellow-500 w-3 h-3"></div>
+                <div className="terminal-control bg-green-500 w-3 h-3"></div>
+              </div>
+              <div className="flex-1 text-center text-base opacity-70">Initialize New Protocol</div>
             </div>
+
+            <form onSubmit={handleSubmit} className="terminal-content space-y-4 p-3">
+              {showSuggestions ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap size={16} className="text-terminal-green" />
+                    <h3 className="terminal-text text-sm">{'>'}_Quick Protocol Selection</h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {COMMON_HABITS.map((habit) => (
+                      <motion.button
+                        key={habit.name}
+                        type="button"
+                        onClick={() => selectCommonHabit(habit)}
+                        className="terminal-suggestion-btn text-left p-2 border border-terminal-green border-opacity-20 
+                                 hover:border-opacity-50 hover:bg-terminal-green hover:bg-opacity-10 transition-all duration-200
+                                 rounded-sm flex flex-col gap-0.5"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <span className="text-terminal-green text-sm font-medium">{habit.name}</span>
+                        <span className="text-xs opacity-70 line-clamp-2">{habit.description}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                  <div className="flex justify-center mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowSuggestions(false)}
+                      className="terminal-button text-sm px-3 py-1.5"
+                    >
+                      {'>'}_Custom Protocol
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Hash size={16} className="text-terminal-green" />
+                      <label htmlFor="name" className="terminal-text text-sm">
+                        {'>'}_Protocol Name
+                      </label>
+                    </div>
+                    <input
+                      type="text"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="terminal-input w-full text-sm p-2"
+                      placeholder="Enter protocol designation..."
+                      maxLength={50}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Terminal size={16} className="text-terminal-green" />
+                      <label htmlFor="description" className="terminal-text text-sm">
+                        {'>'}_Protocol Description
+                      </label>
+                    </div>
+                    <textarea
+                      id="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="terminal-input w-full text-sm p-2 min-h-[80px] resize-none"
+                      placeholder="Enter protocol specifications..."
+                      maxLength={200}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-terminal-green border-opacity-20">
+                <button
+                  type="button"
+                  onClick={() => setShowSuggestions(true)}
+                  className="terminal-button text-sm px-4 py-2"
+                >
+                  <span className="flex items-center gap-2">
+                    <Zap size={16} />
+                    QUICK SELECT
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="terminal-button text-sm px-4 py-2"
+                >
+                  <span className="flex items-center gap-2">
+                    <X size={16} />
+                    ABORT
+                  </span>
+                </button>
+                {!showSuggestions && (
+                  <button
+                    type="submit"
+                    disabled={!name.trim() || loading}
+                    className="terminal-button text-sm px-4 py-2 min-w-[140px] justify-center"
+                  >
+                    {loading ? (
+                      <span className="terminal-loading flex items-center gap-2">
+                        <span className="animate-pulse">INITIALIZING</span>
+                        <span className="animate-[blink_1s_steps(1)_infinite]">...</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Plus size={16} />
+                        INITIALIZE
+                      </span>
+                    )}
+                  </button>
+                )}
+              </div>
+            </form>
           </motion.div>
         </motion.div>
       )}

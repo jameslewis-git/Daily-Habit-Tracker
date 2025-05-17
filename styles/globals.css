@@ -1,9 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import './terminal.css';
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--terminal-font);
 }
 
 @layer utilities {
@@ -48,31 +49,32 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 0%;
+    --foreground: 120 100% 50%;
     --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 120 100% 50%;
     --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --popover-foreground: 120 100% 50%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 120 100% 10%;
+    --secondary-foreground: 120 100% 50%;
+    --muted: 120 100% 10%;
+    --muted-foreground: 120 100% 40%;
+    --accent: 120 100% 10%;
+    --accent-foreground: 120 100% 50%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --destructive-foreground: 120 100% 50%;
+    --border: 120 100% 20%;
+    --input: 120 100% 10%;
+    --ring: 120 100% 50%;
+    --chart-1: 120 100% 50%;
+    --chart-2: 120 70% 40%;
+    --chart-3: 120 60% 30%;
+    --chart-4: 120 50% 20%;
+    --chart-5: 120 40% 10%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -91,4 +93,51 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Terminal Theme Overrides */
+.dark {
+  background-color: var(--terminal-background);
+  color: var(--terminal-green);
+  text-shadow: 0 0 5px var(--terminal-green);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgba(0, 255, 0, 0.5);
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: rgba(0, 51, 0, 0.3);
+  border-color: var(--terminal-green);
+  color: var(--terminal-green);
+}
+
+.dark button {
+  border-color: var(--terminal-green);
+  color: var(--terminal-green);
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.dark button:hover {
+  background-color: var(--terminal-green);
+  color: var(--terminal-background);
+}
+
+.dark .glassmorphism-interactive {
+  backdrop-filter: blur(10px);
+  background: rgba(0, 51, 0, 0.2);
+  border: 1px solid var(--terminal-green);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+}
+
+.dark .shadow-glow-primary {
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+}
+
+.dark .shadow-glow-accent {
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
 }

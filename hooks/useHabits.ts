@@ -39,14 +39,12 @@ export const useHabits = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(habits));
   }, [habits]);
 
-  const addHabit = (name: string, description?: string) => {
+  const addHabit = (habitData: Omit<Habit, 'id' | 'streak' | 'completed'>) => {
     const newHabit: Habit = {
       id: crypto.randomUUID(),
-      name,
-      description,
       completed: false,
       streak: 0,
-      createdAt: new Date().toISOString(),
+      ...habitData,
       position: habits.length,
     };
     setHabits([...habits, newHabit]);
