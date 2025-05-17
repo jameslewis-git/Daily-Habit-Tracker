@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, PlusSquare, AlertTriangle } from 'lucide-react';
 
 interface AddHabitModalProps {
   isOpen: boolean;
@@ -15,107 +15,154 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [nameError, setNameError] = useState('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      onAdd(name.trim(), description.trim() || undefined);
+    if (!name.trim()) {
+      setNameError('Protocol Name is mandatory for system integration.');
+      nameInputRef.current?.focus();
+      return;
+    }
+    setNameError('');
+    onAdd(name.trim(), description.trim() || undefined);
+    // Resetting state is handled by useEffect [isOpen]
+    onClose();
+  };
+
+  useEffect(() => {
+    if (isOpen) {
       setName('');
       setDescription('');
-      onClose();
-    }
+      setNameError('');
+      // Delay focus to allow modal animation to complete
+      setTimeout(() => nameInputRef.current?.focus(), 150);
+    } 
+  }, [isOpen]);
+
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.9, y: 50, filter: 'blur(8px)' },
+    visible: { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 250, damping: 30, delay: 0.05 } },
+    exit: { opacity: 0, scale: 0.9, y: 30, filter: 'blur(5px)', transition: { duration: 0.25, ease: 'easeIn' } },
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.3 } }}
+          onClick={onClose}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-          />
-
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 p-4"
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={(e) => e.stopPropagation()}
+            className="glassmorphism-interactive w-full max-w-lg rounded-xl p-6 sm:p-8 shadow-2xl border-border/70 dark:border-primary/30"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-habit-modal-title"
           >
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-gray-900/90 backdrop-blur-xl">
-              <div className="relative p-6">
-                <button
-                  onClick={onClose}
-                  className="absolute right-4 top-4 text-white/60 hover:text-white"
-                >
-                  <X size={20} />
-                </button>
+            <div className="relative">
+              <motion.button
+                onClick={onClose}
+                className="absolute -right-3 -top-3 text-muted-foreground hover:text-primary p-1.5 rounded-full hover:bg-card/70 focus-visible:ring-2 focus-visible:ring-primary"
+                whileHover={{ scale: 1.25, rotate: 135, transition: {type: 'spring', stiffness:300} }}
+                whileTap={{ scale: 0.9 }}
+                title="Terminate Process"
+                aria-label="Close add habit modal"
+              >
+                <X size={26} strokeWidth={2.5} />
+              </motion.button>
 
-                <h2 className="mb-6 text-2xl font-semibold text-white">
-                  Add New Habit
-                </h2>
+              <h2 id="add-habit-modal-title" className="mb-2 text-2xl sm:text-3xl font-semibold text-gradient-primary-secondary text-focus-in">
+                Initiate New Protocol
+              </h2>
+              <p className="mb-6 sm:mb-8 text-sm text-muted-foreground">
+                Define parameters for a new habit integration sequence.
+              </p>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="mb-2 block text-sm font-medium text-white/80"
-                    >
-                      Habit Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      placeholder="Enter habit name"
-                      autoFocus
-                    />
-                  </div>
+              <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+                <div>
+                  <label
+                    htmlFor="habit-name-input"
+                    className="mb-1.5 block text-sm font-medium text-foreground/80 tracking-wide"
+                  >
+                    Protocol Name <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    id="habit-name-input"
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (e.target.value.trim()) setNameError('');
+                    }}
+                    className={`w-full rounded-md border-2 bg-background/60 px-4 py-3 text-foreground placeholder:text-muted-foreground/60 
+                               focus:outline-none focus:ring-2 focus:ring-primary/80 transition-all duration-200 shadow-sm 
+                               hover:border-primary/70 focus:border-primary ${nameError ? 'border-red-500/70 focus:ring-red-500/50' : 'border-border'}`}
+                    placeholder="e.g., 'Daily_Recon_Scan'"
+                  />
+                  {nameError && (
+                    <motion.p 
+                      initial={{opacity:0, y: -10}}
+                      animate={{opacity:1, y:0}}
+                      className="mt-2 flex items-center text-xs text-red-400">
+                      <AlertTriangle size={14} className="mr-1.5"/> {nameError}
+                    </motion.p>
+                  )}
+                </div>
 
-                  <div>
-                    <label
-                      htmlFor="description"
-                      className="mb-2 block text-sm font-medium text-white/80"
-                    >
-                      Description (optional)
-                    </label>
-                    <textarea
-                      id="description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      placeholder="Enter habit description"
-                      rows={3}
-                    />
-                  </div>
+                <div>
+                  <label
+                    htmlFor="habit-description-input"
+                    className="mb-1.5 block text-sm font-medium text-foreground/80 tracking-wide"
+                  >
+                    Operational Briefing (Optional)
+                  </label>
+                  <textarea
+                    id="habit-description-input"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full rounded-md border-2 border-border bg-background/60 px-4 py-3 text-foreground placeholder:text-muted-foreground/60 
+                               focus:outline-none focus:ring-2 focus:ring-primary/80 transition-all duration-200 shadow-sm 
+                               hover:border-primary/70 focus:border-primary min-h-[90px] resize-y"
+                    placeholder="e.g., 'Execute 15-minute data assimilation cycle from Sector 7 archives.'"
+                    rows={3}
+                  />
+                </div>
 
-                  <div className="flex justify-end gap-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="rounded-lg px-4 py-2 text-white/80 hover:text-white"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!name.trim()}
-                      className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-2 font-medium text-white disabled:opacity-50"
-                    >
-                      Add Habit
-                    </button>
-                  </div>
-                </form>
-              </div>
+                <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 sm:pt-5">
+                  <motion.button
+                    type="button"
+                    onClick={onClose}
+                    className="btn-futuristic btn-futuristic-secondary w-full sm:w-auto !bg-muted hover:!bg-muted/80 !text-muted-foreground hover:!border-border"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    Abort Sequence
+                  </motion.button>
+                  <motion.button
+                    type="submit"
+                    className={`btn-futuristic w-full sm:w-auto ${!name.trim() ? 'opacity-60 cursor-not-allowed !shadow-none' : ''}`}
+                    disabled={!name.trim()} 
+                    whileHover={name.trim() ? { scale: 1.03, y: -3, transition: {type: 'spring', stiffness:300} } : {}}
+                    whileTap={name.trim() ? { scale: 0.97, y: 0 } : {}}
+                  >
+                    <PlusSquare size={20} className="inline mr-2 -mt-0.5" />
+                    Integrate Protocol
+                  </motion.button>
+                </div>
+              </form>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );
