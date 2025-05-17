@@ -17,10 +17,12 @@ const AnimatedPercentage: React.FC<{ percentage: number }> = ({ percentage }) =>
 };
 
 export const CircularProgress: React.FC<CircularProgressProps> = ({ percentage }) => {
-  const radius = 75; // Slightly larger
+  const radius = 75;
   const strokeWidth = 12;
+  const viewBoxSize = 2 * (radius + strokeWidth + 5); // Added a little padding for clip path
+  const center = viewBoxSize / 2;
+
   const circumference = 2 * Math.PI * radius;
-  // Animate strokeDashoffset with spring physics for a more organic feel
   const progressSpring = useSpring(circumference, { stiffness: 50, damping: 30, mass: 1.2 });
   React.useEffect(() => {
     progressSpring.set(circumference - (percentage / 100) * circumference);
@@ -50,17 +52,8 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({ percentage }
           className="absolute inset-0 -rotate-90 transform"
           width="100%"
           height="100%"
-          viewBox={`0 0 ${2 * (radius + strokeWidth)} ${2 * (radius + strokeWidth)}`}
+          viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
         >
-          {/* Background Track */}
-          <circle
-            cx={radius + strokeWidth}
-            cy={radius + strokeWidth}
-            r={radius}
-            className="fill-none stroke-slate-500/15 dark:stroke-slate-700/20"
-            strokeWidth={strokeWidth * 0.8} // Thinner track
-          />
-          {/* Futuristic Glow / Atmosphere */}
           <defs>
             <filter id="atmosphereGlow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="5" result="blur" />
@@ -73,32 +66,46 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({ percentage }
                 <feMergeNode in="SourceGraphic" /> 
               </feMerge>
             </filter>
-          </defs>
-          <circle // Base for the atmospheric glow, slightly larger
-            cx={radius + strokeWidth}
-            cy={radius + strokeWidth}
-            r={radius + strokeWidth / 3}
-            className="fill-none stroke-primary/20 dark:stroke-primary/30 opacity-0 dark:opacity-60"
-            strokeWidth={strokeWidth * 1.5}
-            filter="url(#atmosphereGlow)"
-          />
-          {/* Progress Arc */}
-          <motion.circle
-            cx={radius + strokeWidth}
-            cy={radius + strokeWidth}
-            r={radius}
-            className="fill-none stroke-[url(#sciFiProgressGradient)] drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)] dark:drop-shadow-[0_0_12px_hsl(var(--primary)/0.9)]"
-            strokeWidth={strokeWidth}
-            strokeDasharray={circumference}
-            style={{ strokeDashoffset: progressSpring }}
-            strokeLinecap="round"
-          />
-          <defs>
             <linearGradient id="sciFiProgressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor={progressColorStop1} />
               <stop offset="100%" stopColor={progressColorStop2} /> 
             </linearGradient>
+            <clipPath id="circularClip">
+              {/* Clip path slightly larger than the main radius + stroke to contain glow */}
+              <circle cx={center} cy={center} r={radius + strokeWidth / 2 + 2} />
+            </clipPath>
           </defs>
+
+          <g clipPath="url(#circularClip)">
+            {/* Background Track */}
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              className="fill-none stroke-slate-500/15 dark:stroke-slate-700/20"
+              strokeWidth={strokeWidth * 0.8} 
+            />
+            {/* Futuristic Glow / Atmosphere Base */}
+            <circle 
+              cx={center}
+              cy={center}
+              r={radius + strokeWidth / 3}
+              className="fill-none stroke-primary/20 dark:stroke-primary/30 opacity-0 dark:opacity-60"
+              strokeWidth={strokeWidth * 1.5}
+              filter="url(#atmosphereGlow)"
+            />
+            {/* Progress Arc */}
+            <motion.circle
+              cx={center}
+              cy={center}
+              r={radius}
+              className="fill-none stroke-[url(#sciFiProgressGradient)] drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)] dark:drop-shadow-[0_0_12px_hsl(var(--primary)/0.9)]"
+              strokeWidth={strokeWidth}
+              strokeDasharray={circumference}
+              style={{ strokeDashoffset: progressSpring }}
+              strokeLinecap="round"
+            />
+          </g>
         </svg>
         
         <div className="absolute inset-0 flex flex-col items-center justify-center select-none">

@@ -53,10 +53,163 @@
   }
 }
 
+/* CRT screen and scan effects */
+@keyframes crt-flicker {
+  0% { opacity: 0.93; }
+  50% { opacity: 1; }
+  100% { opacity: 0.93; }
+}
+
+@keyframes scanline {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes terminal-glow {
+  0%, 100% { 
+    text-shadow: 
+      0 0 5px rgba(0, 255, 0, 0.8),
+      0 0 10px rgba(0, 255, 0, 0.5),
+      0 0 15px rgba(0, 255, 0, 0.3);
+  }
+  50% { 
+    text-shadow: 
+      0 0 7px rgba(0, 255, 0, 0.9),
+      0 0 15px rgba(0, 255, 0, 0.6),
+      0 0 25px rgba(0, 255, 0, 0.4);
+  }
+}
+
+/* Terminal screen container */
+.terminal-screen {
+  position: relative;
+  background: rgba(0, 20, 0, 0.95);
+  border: 2px solid rgba(0, 255, 0, 0.2);
+  box-shadow: 
+    inset 0 0 50px rgba(0, 255, 0, 0.15),
+    0 0 30px rgba(0, 255, 0, 0.15);
+  overflow: hidden;
+  animation: crt-flicker 10s infinite;
+}
+
+.terminal-screen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(
+      transparent 50%,
+      rgba(0, 255, 0, 0.05) 50%
+    );
+  background-size: 100% 4px;
+  pointer-events: none;
+}
+
+.terminal-screen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(
+    transparent 0%,
+    rgba(0, 255, 0, 0.1) 50%,
+    transparent 100%
+  );
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+}
+
+/* Loading bar styles */
+.loading-bar-container {
+  width: 300px;
+  height: 2px;
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid rgba(0, 255, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-bar {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #0f0,
+    transparent
+  );
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Terminal text styles */
+.terminal-text {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  color: #0f0;
+  animation: terminal-glow 2s ease-in-out infinite;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+}
+
+.terminal-text-static {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  color: #0f0;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  letter-spacing: 0.1em;
+}
+
+/* Terminal cursor */
+.terminal-cursor::after {
+  content: "▋";
+  animation: cursor-blink 1s step-end infinite;
+  margin-left: 2px;
+  color: #0f0;
+}
+
 body {
-  font-family: 'Inter', 'Poppins', sans-serif;
-  @apply bg-background text-foreground;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  background: #000;
+  color: #0f0;
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Terminal overlay effects */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  animation: scanline 10s linear infinite;
+  z-index: 100;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 0,
+    rgba(0, 32, 0, 0.2) 100%
+  );
+  pointer-events: none;
+  z-index: 101;
 }
 
 @layer utilities {
@@ -131,22 +284,22 @@ body {
   }
 
   .glassmorphism-interactive {
-    @apply bg-card/50 dark:bg-card/60 backdrop-blur-xl border border-border/40 dark:border-border/60 rounded-xl shadow-lg dark:shadow-primary/10;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    @apply bg-card/90 backdrop-blur-sm border border-primary/30 rounded-sm;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2), inset 0 0 15px rgba(0, 255, 0, 0.1);
+    transition: all 0.3s ease;
   }
   .glassmorphism-interactive:hover {
-    @apply shadow-xl dark:shadow-2xl dark:shadow-primary/20 transform scale-[1.02];
-    border-color: hsl(var(--primary) / 0.5);
+    @apply border-primary/50;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.15);
   }
 
   /* Futuristic Button Style */
   .btn-futuristic {
-    @apply px-5 py-2.5 rounded-lg font-semibold text-primary-foreground 
-           bg-primary hover:bg-primary/80 
-           border-2 border-primary/50 hover:border-primary 
-           shadow-md hover:shadow-lg hover:shadow-primary/30 
-           focus:outline-none focus:ring-2 focus:ring-primary/70 focus:ring-offset-2 focus:ring-offset-background 
-           transition-all duration-200 ease-in-out transform hover:-translate-y-0.5;
+    @apply px-4 py-2 rounded-sm font-mono text-primary-foreground 
+           bg-primary/20 hover:bg-primary/30 
+           border border-primary/50 hover:border-primary
+           transition-all duration-200 ease-in-out;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
   }
   .dark .btn-futuristic {
     box-shadow: 0 0 15px hsl(var(--primary) / 0.7), 0 0 30px hsl(var(--primary) / 0.5);
@@ -157,51 +310,67 @@ body {
   .dark .btn-futuristic-secondary {
     box-shadow: 0 0 15px hsl(var(--accent) / 0.7), 0 0 30px hsl(var(--accent) / 0.5);
   }
+
+  /* Custom scrollbar for terminal theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background/30;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/30 hover:bg-primary/50;
+    border: 1px solid rgba(0, 255, 0, 0.3);
+  }
 }
 
 @layer base {
   :root {
-    --background: 220 60% 97%;
-    --foreground: 220 20% 25%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 25%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 25%;
-    --primary: 200 100% 60%;
-    --primary-foreground: 200 100% 15%;
-    --secondary: 340 100% 80%;
-    --secondary-foreground: 340 100% 30%;
-    --muted: 220 30% 93%;
-    --muted-foreground: 220 20% 45%;
-    --accent: 145 58% 75%;
-    --accent-foreground: 145 58% 25%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 30% 85%;
-    --input: 220 30% 95%;
-    --ring: 200 100% 60%;
-    --radius: 0.8rem;
+    --background: 120 10% 5%;
+    --foreground: 120 100% 85%;
+    --card: 120 10% 10%;
+    --card-foreground: 120 100% 85%;
+    --popover: 120 10% 5%;
+    --popover-foreground: 120 100% 85%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 120 10% 5%;
+    --secondary: 120 70% 40%;
+    --secondary-foreground: 120 100% 85%;
+    --muted: 120 15% 15%;
+    --muted-foreground: 120 60% 70%;
+    --accent: 120 70% 45%;
+    --accent-foreground: 120 100% 90%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 100% 90%;
+    --border: 120 30% 25%;
+    --input: 120 15% 15%;
+    --ring: 120 100% 50%;
+    --radius: 0.25rem;
   }
+
   .dark {
-    --background: 230 30% 8%;
-    --foreground: 220 25% 88%;
-    --card: 235 25% 14%;
-    --card-foreground: 220 25% 88%;
-    --popover: 230 30% 6%;
-    --popover-foreground: 220 25% 88%;
-    --primary: 190 100% 50%;
-    --primary-foreground: 230 100% 95%;
-    --secondary: 280 100% 65%;
-    --secondary-foreground: 230 100% 95%;
-    --muted: 235 20% 20%;
-    --muted-foreground: 220 20% 65%;
-    --accent: 50 100% 50%;
-    --accent-foreground: 50 100% 10%;
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 230 20% 25%;
-    --input: 235 25% 18%;
-    --ring: 190 100% 50%;
+    --background: 120 10% 5%;
+    --foreground: 120 100% 85%;
+    --card: 120 10% 8%;
+    --card-foreground: 120 100% 85%;
+    --popover: 120 10% 5%;
+    --popover-foreground: 120 100% 85%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 120 10% 5%;
+    --secondary: 120 70% 40%;
+    --secondary-foreground: 120 100% 85%;
+    --muted: 120 15% 15%;
+    --muted-foreground: 120 60% 70%;
+    --accent: 120 70% 45%;
+    --accent-foreground: 120 100% 90%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 100% 90%;
+    --border: 120 30% 25%;
+    --input: 120 15% 15%;
+    --ring: 120 100% 50%;
   }
 
   * {
@@ -322,8 +491,15 @@ button, a {
 
 /* Custom styles for the main container */
 .main-container {
-  @apply flex flex-col items-center justify-start min-h-screen w-full p-4 sm:p-6 md:p-8;
-  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.5) 50%, hsl(var(--background)) 100%);
+  position: relative;
+  min-height: 100vh;
+  background: 
+    radial-gradient(
+      circle at center,
+      rgba(0, 40, 0, 0.2) 0%,
+      rgba(0, 20, 0, 0.4) 50%,
+      rgba(0, 10, 0, 0.6) 100%
+    );
 }
 
 .dark .main-container {
@@ -497,4 +673,200 @@ button, a {
 @keyframes confetti-fast {
   0% { transform: translate3d(0, 0, 0) rotateX(0) rotateY(0); }
   100% { transform: translate3d(-50px, 105vh, 0) rotateX(10deg) rotateY(250deg); }
+}
+
+/* Terminal theme colors */
+:root {
+  --terminal-bg: #001100;
+  --terminal-green: #00ff00;
+  --terminal-green-dim: rgba(0, 255, 0, 0.7);
+  --terminal-green-dimmer: rgba(0, 255, 0, 0.4);
+  --terminal-green-dimmest: rgba(0, 255, 0, 0.1);
+  --terminal-border: rgba(0, 255, 0, 0.2);
+  --terminal-glow: 0 0 10px rgba(0, 255, 0, 0.3);
+  --terminal-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+}
+
+/* Main container styles */
+.terminal-container {
+  background-color: var(--terminal-bg);
+  min-height: 100vh;
+  color: var(--terminal-green);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Terminal window effect */
+.terminal-window {
+  position: relative;
+  background: rgba(0, 17, 0, 0.95);
+  border: 1px solid var(--terminal-border);
+  padding: 1.5rem;
+  margin: 1rem;
+  box-shadow: var(--terminal-shadow);
+}
+
+/* Protocol card styles */
+.protocol-card {
+  background: rgba(0, 255, 0, 0.05);
+  border: 1px solid var(--terminal-border);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.protocol-card:hover {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: var(--terminal-green-dim);
+  box-shadow: var(--terminal-glow);
+}
+
+/* Progress circle styles */
+.progress-circle {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem auto;
+}
+
+.progress-circle::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 2px solid var(--terminal-green-dimmest);
+  border-radius: 50%;
+}
+
+.progress-value {
+  position: absolute;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--terminal-green);
+  text-shadow: var(--terminal-glow);
+}
+
+/* Button styles */
+.terminal-button {
+  background: transparent;
+  border: 1px solid var(--terminal-border);
+  color: var(--terminal-green);
+  padding: 0.5rem 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.terminal-button:hover {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: var(--terminal-green-dim);
+  box-shadow: var(--terminal-glow);
+}
+
+/* Header controls */
+.terminal-controls {
+  display: flex;
+  gap: 0.5rem;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.terminal-control-btn {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--terminal-border);
+  background: transparent;
+  color: var(--terminal-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.terminal-control-btn:hover {
+  border-color: var(--terminal-green-dim);
+  background: rgba(0, 255, 0, 0.1);
+  box-shadow: var(--terminal-glow);
+}
+
+/* Add habit button */
+.add-habit-btn {
+  position: absolute;
+  bottom: -1rem;
+  right: 0;
+  width: 3rem;
+  height: 3rem;
+  background: transparent;
+  border: 1px solid var(--terminal-green-dim);
+  color: var(--terminal-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-habit-btn:hover {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: var(--terminal-green);
+  box-shadow: var(--terminal-glow);
+  transform: translateY(-2px);
+}
+
+/* Terminal text styles */
+.terminal-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--terminal-green);
+  margin-bottom: 0.5rem;
+  text-shadow: var(--terminal-glow);
+}
+
+.terminal-subtitle {
+  font-size: 0.875rem;
+  color: var(--terminal-green-dim);
+  margin-bottom: 2rem;
+}
+
+.terminal-section-title {
+  font-size: 1.25rem;
+  color: var(--terminal-green);
+  margin-bottom: 1rem;
+  text-shadow: var(--terminal-glow);
+}
+
+/* Keep existing utility classes but update their colors */
+.glassmorphism-interactive {
+  background: rgba(0, 17, 0, 0.7);
+  border: 1px solid var(--terminal-border);
+  backdrop-filter: blur(10px);
+}
+
+.glassmorphism-interactive:hover {
+  border-color: var(--terminal-green-dim);
+  box-shadow: var(--terminal-glow);
+}
+
+/* Update scrollbar for terminal theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: var(--terminal-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--terminal-green-dimmer);
+  border: 1px solid var(--terminal-green-dim);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--terminal-green-dim);
 }

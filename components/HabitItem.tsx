@@ -24,7 +24,7 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? undefined : transition,
     zIndex: isDragging ? 100 : 'auto',
-    opacity: isDragging ? 0.8 : 1,
+    opacity: isDragging ? 0.75 : 1,
   };
 
   const cardVariants = {
@@ -37,7 +37,7 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
     hover: { 
       scale: 1.02, 
       boxShadow: "0px 8px 25px -8px hsl(var(--primary) / 0.3), 0px 4px 10px -5px hsl(var(--primary) / 0.2)",
-      borderColor: "hsl(var(--primary) / 0.7)"
+      borderColor: "hsl(var(--primary) / 0.8)"
     }
   };
   
@@ -80,33 +80,58 @@ export const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle }) => {
           flex items-center justify-center 
           border-2 transition-all duration-200 ease-in-out 
           focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-primary
+          group
           ${habit.completed
-            ? 'bg-gradient-to-br from-primary to-secondary border-transparent shadow-lg shadow-primary/30'
-            : 'bg-transparent border-primary/40 hover:border-primary'
+            ? 'bg-primary/20 border-primary/70 shadow-glow-primary dark:shadow-glow-primary'
+            : 'bg-transparent border-muted-foreground/30 hover:border-primary/70'
           }
         `}
-        whileHover={{ scale: 1.18, transition: { type: 'spring', stiffness: 300 } }}
-        whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 400 } }}
+        whileHover={{ 
+          scale: 1.18, 
+          borderColor: habit.completed ? 'hsl(var(--primary))' : 'hsl(var(--primary))',
+          transition: { type: 'spring', stiffness: 300, damping: 15 } 
+        }}
+        whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
         title={habit.completed ? "Deactivate Protocol" : "Activate Protocol"}
       >
         <AnimatePresence mode='wait' initial={false}>
           {habit.completed ? (
             <motion.div
               key="completed-icon"
-              initial={{ scale: 0.5, opacity: 0, rotate: -180 }}
-              animate={{ scale: 1, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 350, damping: 15, delay: 0.1 } }}
-              exit={{ scale: 0.5, opacity: 0, rotate: 180, transition: { duration: 0.2 } }}
+              initial={{ scale: 0.3, opacity: 0, rotate: -90 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1, 
+                rotate: 0, 
+                transition: { type: "spring", stiffness: 400, damping: 18, delay: 0.05 } 
+              }}
+              exit={{ 
+                scale: 0.3, 
+                opacity: 0, 
+                rotate: 90, 
+                transition: { type: "spring", stiffness: 300, damping: 20, duration: 0.2 } 
+              }}
+              className="text-primary"
             >
-              <CheckCircle size={24} className="text-primary-foreground drop-shadow-md" strokeWidth={2.5}/>
+              <CheckCircle size={22} strokeWidth={2.5}/>
             </motion.div>
           ) : (
             <motion.div
               key="incomplete-icon"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1, transition: { type: "spring", stiffness: 350, damping: 15 } }}
-              exit={{ scale: 0.5, opacity: 0, transition: { duration: 0.2 } }}
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1, 
+                transition: { type: "spring", stiffness: 400, damping: 18 } 
+              }}
+              exit={{ 
+                scale: 0.6, 
+                opacity: 0, 
+                transition: { type: "spring", stiffness: 300, damping: 20, duration: 0.15 } 
+              }}
+              className="text-muted-foreground/60 group-hover:text-primary transition-colors duration-200"
             >
-              <Target size={20} className="text-primary/90 group-hover:text-primary" strokeWidth={2} />
+              <Target size={20} strokeWidth={2} />
             </motion.div>
           )}
         </AnimatePresence>
