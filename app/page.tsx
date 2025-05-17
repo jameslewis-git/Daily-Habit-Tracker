@@ -248,9 +248,9 @@ export default function Home() {
           <p className="terminal-subtitle text-2xs sm:text-xs">
             $ initialize reality_matrix --mode=optimization
           </p>
-        </motion.div>
+                </motion.div>
       </header>
-
+            
       <main className="w-full max-w-xl mx-auto px-2 sm:px-3 py-2 flex flex-col gap-3 sm:gap-4">
         <motion.section 
           aria-label="Overall Progress Nexus"
@@ -283,7 +283,7 @@ export default function Home() {
             <h2 className="terminal-section-title text-sm sm:text-base">
               {'>'}ACTIVE_PROTOCOLS
             </h2>
-          </div>
+            </div>
 
           <HabitList
             habits={habits}
@@ -301,7 +301,7 @@ export default function Home() {
             }}
             whileTap={{ scale: 0.95 }}
             initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ 
+                          animate={{ 
               opacity: 1,
               scale: 1,
               transition: { delay: 0.2, type: 'spring', stiffness: 200}
