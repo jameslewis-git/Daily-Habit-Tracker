@@ -4,7 +4,6 @@ A terminal-themed habit tracking application that brings a cyberpunk aesthetic t
 
 🔗 **[Live Demo](https://dailyhabitchecklist.netlify.app/)** | Experience the Quantum Habits interface in action
 
-![Quantum Habits Interface](public/quantum-habits-preview.png)
 
 ## ⚡️ Features
 
@@ -118,4 +117,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Made with ⚡️ by [Your Name] 
+Made with ⚡️ by James Lewis
